@@ -1,0 +1,438 @@
+require(tidyverse)
+require(rvest)
+require(httr)
+require(jsonlite)
+library(RColorBrewer)
+
+#---------------------------- Load game & movie metadata -------------------
+
+games <- read_csv("./data/movie_themed_slots.csv",
+                  col_types = cols(game_release_date = col_date(format = "%Y-%m-%d")))
+
+
+# ------------------------- Collect movie data from tmdb -------------------
+api_key <- 'cc001b28933015995f0ca76e012a9c83'
+
+# Keywords:
+get_tmdb_keywords <- function(df, api_key) {
+  
+  base_url <- "https://api.themoviedb.org/3/movie/"
+  request_url <- paste0(base_url, df$tmdb_movie_id,
+                        '/keywords?api_key=', api_key)
+  
+  tryCatch(
+    expr =  {
+      r <- GET(request_url)
+      
+      if (r$status_code != 200) {stop("Status: ", r$status_code)}
+      
+      result <- content(r, "text") %>%
+        fromJSON() %>% .$keywords %>% as_tibble()
+      
+      if (nrow(result) == 0L) {
+        Sys.sleep(1)
+        return(tibble(tmdb_movie_id = df$tmdb_movie_id, keywords = NA))
+      }
+      
+      names(result) <- c("tmdb_movie_id", "keywords")
+      
+      Sys.sleep(1)
+      
+      return(result)
+    },
+    error = function(e) {
+      message("Got an error: ", e, "\n", "Movie ID: ", df$tmdb_movie_id)
+    }
+  )
+  
+}
+
+tmdb_kw <- games %>%
+  group_by(movie_id) %>%
+  slice(1) %>%
+  do(get_tmdb_keywords(., api_key))
+
+
+tmdb_kw <- tmdb_kw %>%
+  mutate(keywords = ifelse(movie_id == "m21",
+                           c("martial arts kung fu fighters japan war"), keywords))
+
+# General movie info:
+get_tmdb_movie <- function(df, api_key) {
+  
+  base_url <- "https://api.themoviedb.org/3/movie/"
+  request_url <- paste0(base_url, df$tmdb_movie_id,
+                        '?api_key=', api_key, '&language=en-US')
+  
+  tryCatch(
+    expr =  {
+      r <- GET(request_url)
+      
+      if (r$status_code != 200) {stop("Status: ", r$status_code)}
+      
+      result <- content(r, "text") %>% fromJSON(.)
+      result_tbl <- tibble(budget = result$budget,
+                           overview = result$overview,
+                           runtime = result$runtime,
+                           genre = list(result$genres$name), 
+                           production_companies = list(result$production_companies$name))
+      
+      if (nrow(result_tbl) == 0L) {
+        Sys.sleep(1)
+        return(tibble(budget = NA,
+                      overview = NA,
+                      runtime = NA,
+                      genre = NA, 
+                      production_companies = NA))
+      }
+      
+      Sys.sleep(1)
+      
+      return(result_tbl)
+    },
+    error = function(e) {
+      message("Got an error: ", e, "\n", "Movie ID: ", df$tmdb_movie_id)
+    }
+  )
+  
+}
+
+tmdb_overview <- games %>%
+  group_by(movie_id) %>%
+  slice(1) %>%
+  do(get_tmdb_movie(., api_key))
+
+tmdb_overview %>% pull(genre) %>% unlist() %>% unique()
+
+
+# Credits:
+get_tmdb_credits <- function(df, api_key) {
+  
+  base_url <- "https://api.themoviedb.org/3/movie/"
+  request_url <- paste0(base_url, df$tmdb_movie_id,
+                        '/credits?api_key=', api_key)
+  
+  tryCatch(
+    expr =  {
+      r <- GET(request_url)
+      
+      if (r$status_code != 200) {stop("Status: ", r$status_code)}
+      
+      result <- content(r, "text") %>% fromJSON()
+      result$cast <- result$cast %>% filter(order <= 4)
+      result$crew <- result$crew %>% filter(department == "Directing",
+                                            job == "Director")
+      
+      result <- tibble(movie_id = result$id,
+                       credits = c("cast", "crew"),
+                       data = list(
+                         result$cast,
+                         result$crew
+                       ))
+      
+      # if (nrow(result) == 0L) {
+      #   Sys.sleep(1)
+      #   return(tibble(tmdb_movie_id = df$tmdb_movie_id, keywords = NA))
+      # }
+      
+      Sys.sleep(1)
+      
+      return(result)
+    },
+    error = function(e) {
+      message("Got an error: ", e, "\n", "Movie ID: ", df$tmdb_movie_id)
+    }
+  )
+  
+}
+
+tmdb_credits <- games %>%
+  group_by(movie_id) %>%
+  slice(1) %>%
+  do(get_tmdb_credits(., api_key))
+
+
+get_tmdb_certificates <- function(df, api_key) {
+  
+  base_url <- "https://api.themoviedb.org/3/movie/"
+  request_url <- paste0(base_url, df$tmdb_movie_id,
+                        '/release_dates?api_key=', api_key)
+  
+  tryCatch(
+    expr =  {
+      r <- GET(request_url)
+      
+      if (r$status_code != 200) {stop("Status: ", r$status_code)}
+      
+      result <- content(r, "parsed")
+      usa_index <- sapply(result$results, function(l){
+        l[[1]] == "US"
+      })
+      
+      if (!any(usa_index)) {
+        Sys.sleep(1)
+        return(tibble(tmdb_movie_id = result$id, mpaa = NA))
+      }
+      
+      if (length(result$results[usa_index][[1]]) == 1) {
+        
+        mpaa <- result$results[usa_index][[1]]$release_dates[[1]]$certification
+        
+      } else {
+        
+        cert_index <- sapply(result$results[usa_index][[1]]$release_dates,
+                             function(l){
+                               l$certification != ""
+                             })
+        
+        if (!any(cert_index)) {
+          Sys.sleep(1)
+          return(tibble(tmdb_movie_id = result$id, mpaa = NA))
+        }
+        
+        mpaa <- result$results[usa_index][[1]]$release_dates[cert_index][[1]]$certification
+        
+      }
+      
+      result <- tibble(tmdb_movie_id = result$id,
+                       mpaa = mpaa)
+      
+      Sys.sleep(1)
+      
+      return(result)
+    },
+    error = function(e) {
+      message("Got an error: ", e, "\n", "Movie ID: ", df$tmdb_movie_id)
+    }
+  )
+  
+}
+
+tmdb_certificates <- games %>%
+  group_by(movie_id) %>%
+  slice(1) %>%
+  do(get_tmdb_certificates(., api_key))
+
+
+
+
+# utility function to create genre tags:
+genres_long <- function(df) {
+  genre <- df$genre %>% unlist() %>% 
+    tolower() %>% gsub(" ", "_", .)
+  result <- tibble::enframe(name = NULL, genre)
+  names(result) <- "genre"
+  return(result)
+}
+
+# utility function to create production company tags:
+prod_comp_long <- function(df) {
+  company <- df$production_companies %>% unlist() %>% 
+    tolower() %>% gsub(" ", "_", .)
+  result <- tibble::enframe(name = NULL, company)
+  names(result) <- "production_company"
+  return(result)
+}
+
+genres <- tmdb_overview %>%
+  select(movie_id, genre) %>%
+  group_by(movie_id) %>%
+  do(genres_long(.)) %>%
+  mutate(presence = 1) %>%
+  tidyr::pivot_wider(id_cols = movie_id, names_from = genre, values_from = presence,
+                     values_fill = list(presence = 0)) %>%
+  tidyr::unnest(., cols = adventure:western)
+
+dj <- genres %>%
+  left_join(., distinct(select(games, movie_id, movie_name)),
+            by = "movie_id") %>%
+  ungroup()
+m_names <- dj$movie_name
+dj <- dj %>% ungroup() %>% select(-movie_id, -movie_name) %>% as.matrix()
+rownames(dj) <- m_names
+#dj <- dist(dj, method = "binary") # proxy::dist(dj, method = 'Jaccard')
+#dj <- ade4::dist.binary(dj, method = 6)
+dj <- proxy::dist(dj, method = 'eDice')
+
+
+# -------------------------- Cluster Analysis ----------------------
+
+
+h <- hclust(dj, method = "ward.D2")
+hd <- as.dendrogram(h)
+
+clusMember = cutree(h, 7)
+
+colLab <- function(n) {
+  if (is.leaf(n)) {
+    a <- attributes(n)
+    labCol <- labelColors[clusMember[which(names(clusMember) == a$label)]]
+    attr(n, "nodePar") <- c(a$nodePar, lab.col = labCol)
+  }
+  n
+}
+
+clusDendro <- dendrapply(hd, colLab)
+
+par(mar = c(0, 0, 0, 21), cex = 0.7, font = 3)
+plot(clusDendro, ann = FALSE, horiz = TRUE)
+
+
+png("./figures/hd.png",
+    width = 780*1.6,
+    height = 1220*1.6,
+    res = 320)
+par(mar = c(0, 0, 0, 20), 
+    cex = 0.4, font = 3)
+plot(clusDendro, ann = FALSE, horiz = TRUE)
+dev.off()
+
+
+# 
+# par(mar = c(0, 0, 0, 3))
+# plot(ape::as.phylo(h), tip.color = labelColors[cutree(h, 8)],
+#      label.offset = 0.2, cex = 0.6)
+
+
+# library(factoextra)
+# fviz_dend(h, cex = 0.4, horiz = TRUE, main = "",
+#           k = 10, color_labels_by_k = FALSE,
+#           rect = TRUE, rect_fill = TRUE,
+#           #type = "circular",
+#           show_labels = TRUE,
+#           ggtheme = theme_void(), axes = FALSE) +
+#   theme(plot.margin = margin(0, 30, 0, 2))
+
+
+tmdb_overview <- tmdb_overview %>%
+  ungroup() %>%
+  mutate(cluster = paste0("C", cutree(h, k = 7)
+  ))
+
+tmdb_overview %>%
+  filter(cluster == "C5") %>% 
+  left_join(., games, by = "movie_id") %>% View
+
+tmdb_overview %>%
+  filter(cluster == "C2") %>%
+  pull(genre) %>% 
+  unlist() %>% table() %>% 
+  as_tibble() %>% 
+  setNames(., c("genre", "n")) %>% 
+  arrange(-n) %>% 
+  mutate(perc = n / sum(n) * 100)
+
+tmdb_overview %>% 
+  group_by(cluster) %>% 
+  count() %>% arrange(-n) %>% 
+  ungroup() %>%
+  mutate(perc = n/sum(n)*100)
+
+
+# par_coord <- tmdb_overview %>% 
+#   group_by(cluster) %>% 
+#   mutate(n = n()) %>% 
+#   select(cluster, genre, n) %>% 
+#   unnest(cols = c(genre)) %>% 
+#   group_by(cluster, genre) %>% 
+#   # count() %>% 
+#   summarise(perc = n()/unique(n)*100) %>% 
+#   arrange(cluster, -perc)
+# 
+# 
+# par_coord %>% filter(cluster == "C1") %>% 
+# ggplot(., aes(reorder(genre, -perc), perc, group = cluster)) +
+#   geom_line() + geom_point()
+#   scale_color_brewer(type = "qual", palette = "Paired") +
+#   facet_wrap(~cluster)
+
+
+
+# ----------------------- Credits -------------------------
+
+# Directors and number of films:
+director_counts <- tmdb_credits %>% 
+  filter(credits == "crew") %>% 
+  unnest(cols = data) %>% 
+  group_by(name) %>% 
+  count() %>% 
+  arrange(-n)
+
+# Percentage of directors with a given number of movies:
+director_counts %>% 
+  pull(n) %>% 
+  table() %>% 
+  prop.table() * 100
+
+
+# Top billing actors and number of films:
+actor_counts <- tmdb_credits %>% 
+  filter(credits == "cast") %>% 
+  unnest(cols = data) %>% 
+  group_by(name) %>% 
+  count() %>% 
+  arrange(-n)
+
+# Percentage of actors with a given number of movies:
+actor_counts %>% 
+  pull(n) %>% 
+  table() %>% 
+  prop.table() * 100
+
+# Movies where top actors appeared:
+actor_counts %>% 
+  filter(n > 2) %>% 
+  left_join(., unnest(filter(tmdb_credits, credits == "cast"), cols = data),
+            by = "name") %>% 
+  rename(tmdb_movie_id = movie_id) %>% 
+  left_join(., select(games, movie_name, tmdb_movie_id),
+            by = "tmdb_movie_id") %>% 
+  select(name, movie_name) %>% 
+  distinct() %>% 
+  View()
+
+
+# -------------------- MPAA ratings --------------------
+
+mppa_agg <- tmdb_certificates %>% 
+  na.omit() %>% 
+  filter(mpaa != "NR") %>% 
+  group_by(mpaa) %>% 
+  count() %>% 
+  arrange(-n) %>% 
+  ungroup() %>% 
+  mutate(this_study = n / sum(n) * 100) %>% 
+  mutate(blanchet_2011 = case_when(
+    mpaa == "PG-13" ~ 25,
+    mpaa == "R" ~ 21,
+    mpaa == "PG" ~ 39,
+    mpaa == "G" ~ 13
+  )) %>% 
+  mutate(mpaa = factor(mpaa, ordered = TRUE, 
+                       levels = c("G", "PG", "PG-13", "R")))
+
+
+png("./figures/mpaa.png",
+    width = 1200,
+    height = 700,
+    res = 160)
+
+mppa_agg %>% 
+  select(-n) %>% 
+  pivot_longer(cols = c(this_study, blanchet_2011),
+               names_to = "study", values_to = "percent") %>% 
+  mutate(Study = case_when(
+    study == "this_study" ~ "this study",
+    study == "blanchet_2011" ~ "Blanchet (2011)"
+  )) %>% 
+  ggplot(aes()) +
+  geom_col(aes(mpaa, percent, 
+               col = NULL,
+               fill = Study),
+           position = position_dodge(width = 0.4), width = 0.3) +
+  scale_fill_manual(values = c("#343a40", "#57cbcc")) +
+  theme_minimal() +
+  labs(x = "MPAA rating", y = "% from total number of films in the respective study") +
+  ylim(c(0, 50))
+  
+dev.off()

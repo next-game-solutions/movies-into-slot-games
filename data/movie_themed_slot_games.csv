@@ -1,0 +1,87 @@
+game_id,game_name,provider,game_release_date,game_release_date_confidence,movie_id,movie_name,movie_release_date,tmdb_movie_id
+g1,20000 Leagues,WGS,2009-11-15,low,m1,"20,000 Leagues Under the Sea",1954-12-23,173
+g2,A Nightmare On Elm Street,888 Holdings,2012-10-18,high,m2,A Nightmare On Elm Street,1984-11-09,377
+g3,Ace Ventura: Pet Detective,Playtech,2015-12-14,medium,m3,Ace Ventura: Pet Detective,1994-02-04,3049
+g4,Aliens,NetEnt,2014-04-24,high,m4,Aliens,1986-07-14,679
+g5,Anchorman: The Legend of Ron Burgundy,SG Digital,2018-05-01,medium,m5,Anchorman: The Legend of Ron Burgundy,2004-06-28,8699
+g6,Basic Instinct,iSoftBet,2013-06-05,medium,m6,Basic Instinct,1992-03-20,402
+g7,Batman Begins,Playtech,2018-01-10,high,m7,Batman Begins,2005-05-31,272
+g8,Batman v Superman: Dawn of Justice,Playtech,2018-01-10,high,m8,Batman v Superman: Dawn of Justice,2016-03-12,209112
+g9,Battle Cry,iSoftBet,NA,low,m9,Battle Cry,1955-02-01,51426
+g10,Bill & Ted's Excellent Adventure,Microgaming,2015-09-15,medium,m10,Bill & Ted's Excellent Adventure,1989-02-17,1648
+g11,Bloodsport,Skywind Group,2019-10-18,high,m11,Bloodsport,1988-02-26,11690
+g12,Breakfast at Tiffany’s,Gamesys,2015-11-01,medium,m12,Breakfast at Tiffany's,1961-10-05,164
+g13,Bridesmaids,Microgaming,2015-08-06,high,m13,Bridesmaids,2011-04-28,55721
+g14,Carry On Camping: Pub Fruit,Blueprint Gaming,2019-07-29,high,m14,Carry On Camping,1969-05-30,19307
+g15,Casper's Mystery Mirror,Blueprint Gaming,2013-04-21,high,m15,Casper,1995-05-26,8839
+g16,Clash of the Titans,888 Holdings,NA,low,m16,Clash of the Titans,2010-03-26,18823
+g17,Creature from the Black Lagoon,NetEnt,2013-12-03,high,m17,Creature from the Black Lagoon,1954-02-12,10973
+g18,Dirty Dancing,Playtech,2017-06-11,high,m18,Dirty Dancing,1987-05-12,88
+g84,The Three Stooges: Disorder in the Court,PariPlay,2015-03-01,low,m19,The Three Stooges: Disorder in the Court,1936-05-30,22950
+g19,Dumb and Dumber: Road Trip to Aspen,Playzido,2019-09-01,medium,m20,Dumb and Dumber,1994-12-06,8467
+g21,Fantasy Mission Force,RTG,2018-01-31,high,m21,Fantasy Mission Force,1983-02-13,38425
+g22,Ferris Bueller's Day Off,SkillOnNet,NA,low,m22,Ferris Bueller's Day Off,1986-07-11,9377
+g23,Flash Gordon,MGA,2019-11-28,low,m23,Flash Gordon,1980-09-01,3604
+g24,From Dusk Till Dawn,Novomatic,2017-10-03,high,m24,From Dusk Till Dawn,1996-01-19,755
+g25,Ghostbusters,IGT,2012-12-01,high,m25,Ghostbusters,1984-06-07,620
+g26,Gladiator,Playtech,2009-01-01,low,m26,Gladiator,2000-05-01,98
+g27,Grease,Daub Alderney,2012-12-20,low,m27,Grease,1978-06-13,621
+g28,Gremlins,SG Digital,2020-03-18,high,m28,Gremlins,1984-06-08,927
+g29,Halloween,Microgaming,2017-10-04,high,m29,Halloween,1978-10-25,948
+g30,Hansel & Gretel: Witch Hunters,iSoftBet,2015-09-20,medium,m30,Hansel & Gretel: Witch Hunters,2013-01-17,60304
+g31,Highlander,Microgaming,2017-12-06,high,m31,Highlander,1986-01-01,8009
+g32,James Dean,SG Digital,2015-11-25,high,m32,James Dean,2001-08-04,2141
+g33,Judge Dredd,SG Digital,2014-10-23,high,m33,Judge Dredd,1995-06-30,9482
+g34,Jumanji,NetEnt,2018-06-21,high,m34,Jumanji,1995-12-15,8844
+g36,Jurassic Park,Microgaming,2014-08-06,high,m35,Jurassic Park,1993-06-09,329
+g37,Jurassic World,Microgaming,2017-06-21,high,m36,Jurassic World,2015-05-29,135397
+g38,Justice League,Playtech,2017-11-17,high,m37,Justice League,2017-10-26,141052
+g39,Kong: The 8th Wonder of the World,Playtech,2011-03-01,low,m38,King Kong,2005-12-05,254
+g40,Lara Croft: Tomb Raider,Microgaming,2004-10-29,medium,m39,Lara Croft: Tomb Raider,2001-06-11,1995
+g86,Tomb Raider: Secret of the Sword,Microgaming,2008-03-10,medium,m39,Lara Croft: Tomb Raider,2001-06-11,1995
+g41,Man of Steel,Playtech,2017-02-08,medium,m40,Man of Steel,2013-06-10,49521
+g42,Mars Attacks!,Blueprint Gaming,2018-12-14,high,m41,Mars Attacks!,1996-12-12,75
+g43,Matinee,Nucleus Gaming,2017-02-03,high,m42,Matinee,1993-01-29,25389
+g44,Monty Python and the Holy Grail,Playtech,2017-05-17,medium,m43,Monty Python and the Holy Grail,1975-03-14,762
+g45,Nacho Libre,iSoftBet,2015-02-09,high,m44,Nacho Libre,2006-06-16,9353
+g20,Eagle Shadow Fist,RTG,2018-02-21,high,m45,Not Scared to Die,1973-01-12,21537
+g46,Paranormal Activity,iSoftBet,2016-10-21,high,m46,Paranormal Activity,2007-10-14,23827
+g47,Planet of the Apes,NetEnt,2017-10-23,high,m47,Planet of the Apes,2001-07-26,869
+g48,Platoon Wild,iSoftBet,2016-07-26,high,m48,Platoon,1986-12-19,792
+g49,Psycho,SG Digital,2015-05-20,medium,m49,Psycho,1960-06-16,539
+g50,Rambo,iSoftBet,2013-12-13,medium,m50,Rambo,2008-01-23,7555
+g51,RoboCop,Playtech,2017-05-17,high,m51,RoboCop,1987-07-17,5548
+g52,Rocky,Playtech,2010-06-15,medium,m52,Rocky,1976-11-20,1366
+g53,Scarface,NetEnt,2012-01-01,medium,m53,Scarface,1983-12-01,111
+g54,Sharknado,PariPlay,2016-02-20,medium,m54,Sharknado,2013-07-11,205321
+g55,Sherlock Holmes: The Hunt for Blackwood,IGT,2015-11-30,high,m55,Sherlock Holmes,2009-12-14,10528
+g58,Suicide Squad,Playtech,2018-09-01,medium,m56,Suicide Squad,2016-08-01,297761
+g60,Superman: The Movie,Playtech,2017-02-24,high,m57,Superman,1978-12-10,1924
+g59,Superman II,Playtech,2017-02-24,high,m58,Superman II,1980-12-04,8536
+g62,ted,Blueprint Gaming,2017-03-13,high,m59,ted,2012-06-29,72105
+g63,ted: Pub Fruits,Blueprint Gaming,2019-01-24,high,m59,ted,2012-06-29,72105
+g64,Terminator 2,Microgaming,2014-06-05,high,m60,Terminator 2: Judgment Day,1991-07-01,280
+g65,Terminator Genisys,Playtech,2018-05-21,high,m61,Terminator Genisys,2015-06-21,87101
+g66,The Dark Knight,Playtech,2018-05-01,medium,m62,The Dark Knight,2008-07-14,155
+g67,The Dark Knight,Microgaming,2012-06-28,high,m62,The Dark Knight,2008-07-14,155
+g68,The Dark Knight Rises,Microgaming,2013-08-30,high,m63,The Dark Knight Rises,2012-07-16,49026
+g69,The Dark Knight Rises,Playtech,2016-03-15,medium,m63,The Dark Knight Rises,2012-07-16,49026
+g70,The Expendables,Stakelogic,2020-02-23,high,m64,The Expendables,2010-08-03,27578
+g71,The Godfather,Gamesys,2015-09-25,high,m65,The Godfather,1972-03-14,238
+g72,"The Good, The Bad and the Ugly",OpenBet,2010-10-01,low,m66,"The Good, the Bad and the Ugly",1966-12-23,429
+g73,The Goonies,Blueprint Gaming,2018-10-25,high,m67,The Goonies,1975-06-07,9340
+g74,The Honeymooners,Microgaming,2017-02-23,high,m68,The Honeymooners,1955-10-01,4439
+g75,The Invisible Man,NetEnt,2014-12-11,high,m69,The Invisible Man,1933-11-03,10787
+g35,Jungle Books,Yggdrasil,2017-09-20,high,m70,The Jungle Book,1942-04-03,278927
+g76,The Lord of the Rings,Microgaming,2010-09-05,medium,m71,The Lord of the Rings: The Fellowship of the Ring,2001-12-10,120
+g77,The Love Guru,iSoftBet,2013-10-02,medium,m72,The Love Guru,2008-06-20,12177
+g78,The Magnificent Seven,Skywind Group,2019-06-02,high,m73,The Magnificent Seven,2016-09-08,333484
+g79,The Mask,SG Digital,2018-05-01,high,m74,The Mask,1994-07-28,854
+g80,The Mask of Zorro,Playtech,2018-01-22,medium,m75,The Mask of Zorro,1998-07-17,9342
+g81,The Matrix,Playtech,2017-09-22,high,m76,The Matrix,1999-03-24,603
+g82,The Mummy,Playtech,2012-01-01,low,m77,The Mummy,1999-04-16,564
+g83,The Naked Gun,Blueprint Gaming,2017-03-15,medium,m78,The Naked Gun: From the Files of Police Squad!,1988-12-02,37136
+g56,Spinal Tap,Blueprint Gaming,2018-06-01,high,m79,This Is Spinal Tap,1984-03-02,11031
+g85,Titanic,SG Digital,2016-03-25,high,m80,Titanic,1997-11-01,597
+g87,Top Gun,Playtech,2015-12-07,medium,m81,Top Gun,1986-05-12,744
+g88,Torrente,Playtech,2017-12-01,medium,m82,"Torrente, the Dumb Arm of the Law",1998-03-13,1283

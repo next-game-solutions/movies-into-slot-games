@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1592438167484.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6DEB44A8",
+    "lastKnownWriteTime" : 1592438287,
+    "last_content_update" : 1592438287809,
+    "path" : "D:/PROJECTS/NGS/MEDIUM_POSTS/movie_themed_slots/scripts/data_collection.R",
+    "project_path" : "scripts/data_collection.R",
+    "properties" : {
+        "cursorPosition" : "14,17",
+        "scrollLine" : "6",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,242 @@
+require(httr)
+require(tidyverse)
+
+# Dapp Review uses XHR requests (see here for the context https://bit.ly/3gnVY11)
+# Also, it turns out they have an API, which they do not talk about anywhere, 
+# but the base URL is https://dapp.review/api/dapps and its publicly accessible.
+
+
+# Build URL to query Dapp Review API:
+url <- parse_url("https://dapp.review/api/dapps")
+url$query <- list(search = "",
+                  category = "casino",
+                  page = 1L,
+                  page_size = 1000L,
+                  ordering = "-usd_24h",
+                  platform = "tron",
+                  lang = "en")
+url <- build_url(url)
+
+
+# Get the data:
+query_datetime = Sys.time()
+dapps <- GET(url = url) %>% 
+  content() %>% 
+  .$results
+
+
+# Utility function to reformat data for each app:
+shape_data <- function(x, query_datetime) {
+  
+  result <- tibble(
+    id = x$id,
+    title = x$title,
+    logo_link = x$media$logo,
+    query_datetime = query_datetime,
+    platform = x$platform,
+    category = x$category,
+    dapp_website = x$dapp_website,
+    balance = x$balance,
+    score = x$score,
+    number_of_reviews = x$number_of_review,
+    volume_24h = x$volume_24h,
+    volume_7d = x$volume_7d,
+    volume_24h_ratio = x$volume_24h_ratio,
+    volume_7d_ratio = x$volume_7d_ratio,
+    usd_24h = x$usd_24h,
+    usd_7d = x$usd_7d,
+    usd_24h_ratio = x$usd_24h_ratio,
+    usd_7d_ratio = x$usd_7d_ratio,
+    tx_24h = x$tx_24h,
+    tx_7d = x$tx_7d,
+    tx_24h_ratio = x$tx_24h_ratio,
+    tx_7d_ratio = x$tx_7d_ratio,
+    users_24h = x$users_24h,
+    users_7d = x$users_7d,
+    users_24h_ratio = x$users_24h_ratio,
+    users_7d_ratio = x$users_7d_ratio,
+    hour_stats = list(x$data$hour_stats),
+    day_stats = list(x$data$day_stats)
+  )
+  
+  return(result)
+}
+
+
+# Reformat data to tabular form:
+dapps <- lapply(dapps, shape_data, query_datetime) %>% 
+  bind_rows()
+
+
+# Utility function to reformat daily time series data into a tabular form:
+shape_ts_data <- function(df) {
+  
+  x <- df$day_stats[[1]]
+  lapply(x, function(z){
+    tibble(
+      datetime = z$datetime,
+      users = z$users,
+      tx = z$tx,
+      usd = z$usd)
+  }) %>% 
+    bind_rows() %>% 
+    filter(datetime < max(datetime)) # exclude last point as incomplete
+}
+
+# Reformat daily time series data to tabular form:
+daily_ts <- dapps %>% 
+  group_by(id, title) %>% 
+  do(shape_ts_data(.)) %>% 
+  mutate(datetime = as.Date(datetime))
+
+
+# Save workspace with all the objects for further analysis:
+save.image(file = "./workspaces/daap_review_data.RData")
+
+
+
+# BetFury
+
+# (u <- daily_ts %>% filter(title == "BETFURY") %>% 
+#   ggplot(aes(datetime, users)) +
+#   geom_line() + ylim(c(0, NA)) + 
+#   geom_smooth(se = F) +
+#   geom_vline(aes(xintercept = as.Date("2020-06-05")),
+#              col = 2, linetype = 2) +
+#   labs(x = "", y = "DAU") +
+#   theme_minimal() + 
+#   ggtitle("Daily active users"))
+# 
+# 
+# (tx <- daily_ts %>% filter(title == "BETFURY") %>% 
+#   ggplot(aes(datetime, tx)) +
+#   geom_line() + ylim(c(0, NA)) + 
+#   geom_smooth(se = F) +
+#   geom_vline(aes(xintercept = as.Date("2020-06-05")),
+#              col = 2, linetype = 2) +
+#   labs(x = "", y = "Number of transactions") +
+#   theme_minimal() + 
+#   ggtitle("Daily number of transactions"))
+# 
+# (usd <- daily_ts %>% filter(title == "BETFURY") %>% 
+#     ggplot(aes(datetime, usd)) +
+#     geom_line() + ylim(c(0, NA)) + 
+#     geom_smooth(se = F) +
+#     geom_vline(aes(xintercept = as.Date("2020-06-05")),
+#                col = 2, linetype = 2) +
+#     labs(x = "", y = "Turnover ($)") +
+#     theme_minimal() + 
+#     ggtitle("Daily turnover"))
+# 
+# 
+# require(gridExtra)
+# grid.arrange(u, tx, usd, ncol = 3)
+# 
+# 
+# bf_dates <- daily_ts %>% filter(title == "BETFURY") %>% pull(datetime)
+# 
+# samp <- daily_ts %>% 
+#   filter(between(datetime, min(bf_dates), max(bf_dates))) %>% 
+#   group_by(id) %>% 
+#   filter(n() == 29) %>% 
+#   ungroup() %>% 
+#   as_tibble() %>% 
+#   select(-usd, -tx, -id) %>% 
+#   pivot_wider(names_from = title, values_from = users)
+# 
+# names(samp) <- tolower(names(samp)) %>%
+#   gsub(" ", "_", .) %>%
+#   gsub("&", "_", ., fixed = TRUE) %>%
+#   gsub("-", "_", ., fixed = TRUE) %>% 
+#   gsub("!", "", ., fixed = TRUE) %>% 
+#   gsub(".", "", ., fixed = TRUE) %>% 
+#   gsub("___龙虎斗", "", ., fixed = TRUE) %>% 
+#   gsub("high___low", "high_low", ., fixed = TRUE) %>% 
+#   gsub("_(tron)", "", ., fixed = TRUE)
+# 
+# samp <- samp %>% 
+#   mutate_at(vars(wink:tronsuperstars), log)
+# 
+# cols <- samp %>% select(-datetime) %>% names()
+# 
+# 
+# require(dtw)
+# 
+# d <- sapply(cols, function(x) {
+#   #cor(samp[, "BETFURY"], samp[, x], method = "sp")
+#   
+#   align <- dtw(
+#     x = samp[, x], # "запрос" 
+#     y = samp$betfury, # "эталон"
+#     step.pattern = symmetric1,    # шаговый паттерн
+#     window.type = "sakoechiba",   # тип окна трансформации
+#     window.size = 7,              # размер окна
+#     keep.internals = FALSE)
+#   
+#   align$distance
+#   
+# }) %>% sort()
+# 
+# 
+# closest <- d %>% head(., 7) %>% names()
+# 
+# samp <- samp[, names(samp) %in% c("datetime", closest)]
+# 
+# samp <- samp %>% rename(Date = datetime) %>% 
+#   arrange(Date)
+# 
+# samp %>% 
+#   ggplot() +
+#   geom_line(aes(datetime, betfury), col = "red") +
+#   geom_line(aes(datetime, dragon7))
+# 
+# #write_csv(samp, "D:/PROJECTS/PLAT/DER_030_Data/betfury/betfury_medium_ban.csv")
+# 
+# 
+# require(CausalImpact)
+# require(bsts)
+# 
+# samp <- cbind.data.frame(Date = samp$Date, betfury = samp$betfury,
+#                          select(samp, -Date, -betfury))
+# 
+# dat_zoo <- zoo::zoo(select(samp, -Date), order.by = samp$Date)
+# 
+# pre.period <- as.Date(c("2020-05-14", "2020-06-04"))
+# post.period <- as.Date(c("2020-06-05", "2020-06-11"))
+# 
+# imp <- CausalImpact(dat_zoo, pre.period, post.period,
+#                     model.args = list(niter = 5000, 
+#                                       nseasons = 1,
+#                                       standardize.data = FALSE,
+#                                       prior.level.sd = 0.01))
+# plot(imp)
+# 
+# y_pre <- samp %>% 
+#   filter(Date <= pre.period[2]) %>% 
+#   pull(betfury)
+# y_post <- samp %>% 
+#   filter(Date > pre.period[2]) %>% 
+#   pull(betfury)
+# 
+# samp_pre <- samp %>% 
+#   mutate(betfury = ifelse(Date <= pre.period[2], betfury, NA))
+# 
+# ss <- list()
+# ss <- AddLocalLinearTrend(ss, y_pre)
+# ss <- AddAr(ss, y_pre)
+# 
+# imp <- bsts(betfury ~ roulette_live + blackjack +
+#                      queen_vs_king + high_low + dragon7 + tron_game_center,
+#                    ss,
+#                    data = samp_pre,
+#                    timestamps = samp_pre$Date, 
+#                    niter = 1500, seed = 42, ping = 0)
+# 
+# plot(imp)
+# summary(imp)
+# plot(imp, "coefficients")
+# plot(imp, "comp")
+# 
+# impact <- CausalImpact(bsts.model = imp,
+#                        post.period.response = y_post)
+# plot(impact)
