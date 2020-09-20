@@ -14,4 +14,4 @@ This repository contains R scripts and datasets used in the Medium article "Movi
 
 # Additional information
 
-If you have any questions regarding this analysis, please get in touch by [email](mailto:next-game-solutions@gmail.com) or visit the website [Next Game Solutions](http://nextgamesolutions.com/).
+If you have any questions regarding this analysis, please get in touch by [email](mailto:info@nextgamesolutions.com) or visit the website [Next Game Solutions](http://nextgamesolutions.com/).
